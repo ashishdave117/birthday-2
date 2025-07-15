@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Birthday Countdown!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #f9e7ef;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    #container {
+      max-width: 375px;
+      margin: 60px auto;
+      background: white;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      border-radius: 18px;
+      padding: 18px;
+      position: relative;
+      z-index: 2;
+    }
+    #countdown {
+      font-size: 2.1em;
+      font-weight: 600;
+      color: #d43f8d;
+      margin: 15px;
+    }
+    #daily-image {
+      width: 80%;
+      max-width: 250px;
+      border-radius: 12px;
+      margin: 18px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    #daily-message {
+      font-size: 1.13em;
+      color: #342344;
+      margin-bottom: 8px;
+      min-height: 42px;
+    }
+    #bday-date {
+      font-size: 1.2em;
+      color: #a055c7;
+      font-weight: bold;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .balloon {
+      position: fixed;
+      bottom: -120px;
+      z-index: 1;
+      border-radius: 60% 60% 60% 60%;
+      animation: float 8s linear infinite;
+      opacity: 0.88;
+      pointer-events: none;
+    }
+    @keyframes float {
+      0% { transform: translateY(0) scale(1);}
+      90% { opacity: 1; }
+      100% {
+        transform: translateY(-115vh) scale(1.12);
+        opacity: 0;
+      }
+    }
+    /* Confetti styles */
+    .confetti {
+      position: fixed;
+      top: -20px;
+      width: 8px;
+      height: 16px;
+      border-radius: 2px;
+      opacity: 0.8;
+      animation: confetti-fall 2.6s linear forwards;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotateZ(360deg);
+        opacity: 0.2;
+      }
+    }
+    @media (max-width: 420px) {
+      #container {
+        margin: 20px auto;
+        padding: 10px;
+      }
+      #daily-image {
+        max-width: 98vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Countdown to Your Birthday!</h1>
+    <div id="bday-date"></div>
+    <div id="countdown"></div>
+    <img id="daily-image" src="" alt="Birthday girl">
+    <div id="daily-message"></div>
+  </div>
+  <script>
+    // SET YOUR BIRTHDAY HERE (year, month-1, day)
+    const birthday = new Date(2025, 6, 25); // July 25, 2025
+
+    const images = [
+      "https://placehold.co/250x300/cfc/554?text=Day+0",
+      "https://placehold.co/250x300/ffd/333?text=Day+1",
+      "https://placehold.co/250x300/ffeff1/ce5?text=Day+2",
+      "https://placehold.co/250x300/ECE1FF/755?text=Day+3",
+      "https://placehold.co/250x300/f2ffe1/675?text=Day+4",
+      "https://placehold.co/250x300/ffffff/333?text=Day+5",
+      "https://placehold.co/250x300/e3e0e7/771?text=Day+6",
+      "https://placehold.co/250x300/fef8cc/430?text=Day+7",
+      "https://placehold.co/250x300/dafcff/11e?text=Day+8",
+      "https://placehold.co/250x300/fff4ed/914?text=Day+9"
+    ];
+
+    const messages = [
+      "10 days to go! Can't wait to celebrate you. 💖",
+      "You're awesome every single day!",
+      "Counting down with love. 💕",
+      "You're my sunshine and my favorite smile.",
+      "Only a few days until your day, beautiful!",
+      "You are loved, today and always.",
+      "Almost time for birthday wishes!",
+      "I hope your days are as sweet as you.",
+      "Your birthday is coming—I'm excited!",
+      "Tomorrow is the day! Happy almost birthday!"
+    ];
+
+    function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+    function getDaysLeft(target) {
+      const MS_IN_DAY = 1000 * 60 * 60 * 24;
+      const now = new Date();
+      // Remove time part for accurate day counting
+      const a = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const b = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+      return Math.ceil((b - a) / MS_IN_DAY);
+    }
+
+    // Flying Balloons Animation
+    function createBalloon() {
+      const colors = [
+        "#ff73b5", "#fdda77", "#65e6ff",
+        "#9e76f9", "#f95d5d", "#7ee672"
+      ];
+      const leftPos = Math.random() * 100; // in vw%
+      const balloon = document.createElement("div");
+      balloon.className = "balloon";
+      balloon.style.left = leftPos + "vw";
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      balloon.style.width = (48 + Math.random() * 35) + "px";
+      balloon.style.height = (64 + Math.random() * 42) + "px";
+      balloon.style.background = color;
+      balloon.style.boxShadow = `0 6px 20px ${color}80`;
+      // Add a "string"
+      const string = document.createElement("div");
+      string.style.width = "2px";
+      string.style.height = "25px";
+      string.style.background = "#af8";
+      string.style.margin = "0 auto";
+      string.style.marginTop = "-12px";
+      string.style.borderRadius = "0 0 8px 8px";
+      balloon.appendChild(string);
+
+      balloon.style.animationDuration = (6 + Math.random()*6) + "s";
+      document.body.appendChild(balloon);
+
+      // Remove after animation
+      setTimeout(() => { balloon.remove(); }, 12000);
+    }
+
+    // Confetti Sprinklers Animation
+    function confettiSprinkle() {
+      for (let i = 0; i < 60; ++i) {
+        const conf = document.createElement("div");
+        conf.className = "confetti";
+        conf.style.left = (Math.random() * 98) + "vw";
+        conf.style.background = [
+          "#ffb3e6", "#fff484", "#8ff5b3", "#bfcaff",
+          "#fabebe", "#e9f8fd", "#fdda77", "#a8e05f", "#f77b72"
+        ][Math.floor(Math.random()*9)];
+        conf.style.transform = `rotateZ(${Math.random()*340}deg)`;
+        conf.style.animationDelay = (Math.random()*0.7) + "s";
+        document.body.appendChild(conf);
+
+        setTimeout(() => conf.remove(), 3000);
+      }
+    }
+
+    function updatePage() {
+      // Show birthday date in a friendly format
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('bday-date').textContent =
+        "🎂 Your Birthday: " + birthday.toLocaleDateString('en-US', options);
+
+      const daysLeft = getDaysLeft(birthday);
+      let idx;
+      if (daysLeft > 0 && daysLeft <= 10) {
+        idx = 10 - daysLeft;
+      } else if (daysLeft <= 0) {
+        idx = messages.length - 1;
+      } else {
+        idx = 0;
+      }
+
+      document.getElementById('countdown').textContent =
+        daysLeft > 0
+          ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go!`
+          : "🎉 Happy Birthday! 🎉";
+
+      document.getElementById('daily-message').textContent =
+        daysLeft > 0 ? messages[clamp(idx,0, messages.length-1)]
+                     : "Wishing you a wonderful birthday and a magical year ahead! 🎂✨";
+
+      document.getElementById('daily-image').src =
+        daysLeft > 0 ? images[clamp(idx,0, images.length-1)] : images[images.length-1];
+
+      // Balloons always fly
+      setInterval(createBalloon, 1450);
+
+      // On your birthday, make a special celebration
+      if (daysLeft <= 0) {
+        setTimeout(confettiSprinkle, 800); // trigger once after birthday loads
+        // Keep sprinkling confetti for 10 seconds
+        let sprinkleCount = 0;
+        const intervalId = setInterval(() => {
+          confettiSprinkle();
+          sprinkleCount++;
+          if (sprinkleCount > 6) clearInterval(intervalId);
+        }, 1500);
+      }
+    }
+
+    updatePage();
+  </script>
+</body>
+</html>
